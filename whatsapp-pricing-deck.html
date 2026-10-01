@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cobro WhatsApp API</title>
+<meta name="description" content="Presentación interactiva de VIVEXIA sobre el cambio de precios de WhatsApp Business API de Meta, vigente desde el 1 de octubre de 2026.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%AC%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ground:#ffffff;
+    --surface:#f5f9ff;
+    --surface-2:#eaf2ff;
+    --ink:#0b1930;
+    --ink-soft:#4a5a78;
+    --ink-faint:#8599bd;
+    --blue-deep:#0b3fa8;
+    --blue-mid:#1c63e0;
+    --blue-bright:#2f8fff;
+    --blue-glow:#7fc0ff;
+    --line:#d7e6ff;
+    --line-strong:#b9d4ff;
+    --warn:#ff5a3c;
+    --warn-soft:#ffe4dc;
+    --good:#0ea678;
+    --good-soft:#d9f6ea;
+    --font-display:'Unbounded','Arial Black',sans-serif;
+    --font-body:'IBM Plex Sans','Segoe UI',sans-serif;
+    --font-mono:'IBM Plex Mono','Consolas',monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ground);
+    color:var(--ink);
+    font-family:var(--font-body);
+    overflow:hidden;
+    height:100dvh;
+    width:100vw;
+    position:relative;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--blue-mid);}
+  a:focus-visible,button:focus-visible{outline:2.5px solid var(--blue-bright);outline-offset:3px;border-radius:4px;}
+  h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;letter-spacing:-0.01em;}
+  p{margin:0;}
+  button{font-family:inherit;}
+
+  /* ---------- ambient background ---------- */
+  .bg-fx{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+  .bg-grid{
+    position:absolute;inset:-2px;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:42px 42px;
+    opacity:.55;
+    mask-image:radial-gradient(ellipse 85% 70% at 50% 35%, black 45%, transparent 92%);
+  }
+  .blob-parallax{position:absolute;inset:0;transition:transform .35s ease-out;will-change:transform;}
+  .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.38;}
+  .blob-a{width:46vw;height:46vw;background:radial-gradient(circle at 35% 35%, var(--blue-bright), transparent 70%);top:-14vw;right:-10vw;animation:drift1 26s ease-in-out infinite;}
+  .blob-b{width:36vw;height:36vw;background:radial-gradient(circle at 60% 40%, var(--blue-glow), transparent 70%);bottom:-12vw;left:-8vw;animation:drift2 32s ease-in-out infinite;}
+  @keyframes drift1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-4vw,5vw) scale(1.12);}}
+  @keyframes drift2{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(5vw,-4vw) scale(1.08);}}
+
+  /* ---------- shell ---------- */
+  .deck{position:relative;z-index:1;height:100dvh;width:100vw;display:flex;flex-direction:column;}
+
+  .chrome-top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px clamp(18px,4vw,48px) 0;
+    flex:0 0 auto;
+  }
+  .logo-mark{display:flex;align-items:center;}
+  .logo-wrap{position:relative;display:inline-block;}
+  .logo-text{
+    position:relative;display:block;white-space:nowrap;
+    font-family:var(--font-display);font-weight:800;font-size:19px;letter-spacing:-.02em;
+    background:linear-gradient(115deg,var(--blue-glow) 0%,var(--blue-mid) 45%,var(--blue-deep) 85%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .logo-text::after{
+    content:attr(data-text);position:absolute;inset:0;
+    background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.9) 50%,transparent 65%);
+    background-size:260% 100%;background-position:-120% 0;
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    mix-blend-mode:overlay;pointer-events:none;
+    animation:logoShine 2.2s ease .7s 1 both;
+  }
+  @keyframes logoShine{ to{ background-position:120% 0; } }
+  .logo-mark.is-big .logo-text{font-size:42px;}
+  @media (prefers-reduced-motion:reduce){ .logo-text::after{animation:none;background-position:120% 0;} }
+  .counter{
+    font-family:var(--font-mono);font-size:13px;color:var(--ink-faint);
+    letter-spacing:.04em;font-variant-numeric:tabular-nums;
+  }
+  .counter b{color:var(--blue-deep);font-weight:600;}
+
+  .progress-rail{
+    height:3px;margin:16px clamp(18px,4vw,48px) 0;background:var(--surface-2);
+    border-radius:2px;overflow:hidden;flex:0 0 auto;
+  }
+  .progress-fill{height:100%;width:11.11%;background:linear-gradient(90deg,var(--blue-mid),var(--blue-bright));border-radius:2px;transition:width .5s cubic-bezier(.65,0,.35,1);}
+
+  .track-viewport{flex:1 1 auto;position:relative;overflow:hidden;}
+  .track{
+    display:flex;height:100%;width:100%;
+    transition:transform .62s cubic-bezier(.65,0,.3,1);
+    will-change:transform;
+  }
+  .slide{
+    flex:0 0 100%;height:100%;width:100%;
+    display:flex;align-items:center;justify-content:center;
+    padding:clamp(18px,3vw,36px) clamp(18px,6vw,100px);
+    opacity:0;transition:opacity .5s ease;
+  }
+  .slide.is-active{opacity:1;}
+  .slide-inner{width:100%;max-width:1040px;}
+
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--font-mono);font-size:12.5px;font-weight:600;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--blue-deep);
+    background:var(--surface-2);border:1px solid var(--line-strong);
+    padding:6px 12px 6px 10px;border-radius:999px;margin-bottom:18px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--blue-bright);box-shadow:0 0 0 3px var(--surface-2);}
+
+  h2.headline{font-size:clamp(28px,4.4vw,52px);line-height:1.04;font-weight:700;color:var(--ink);}
+  h2.headline em{font-style:normal;color:var(--blue-mid);}
+  .lede{font-size:clamp(15px,1.5vw,18px);color:var(--ink-soft);line-height:1.55;margin-top:14px;max-width:62ch;}
+
+  /* staggered reveal for active slide children */
+  .reveal{opacity:0;transform:translateY(16px);transition:opacity .55s ease, transform .55s cubic-bezier(.2,.8,.2,1);}
+  .slide.is-active .reveal{opacity:1;transform:translateY(0);}
+  .slide.is-active .reveal:nth-child(1){transition-delay:.02s;}
+  .slide.is-active .reveal:nth-child(2){transition-delay:.1s;}
+  .slide.is-active .reveal:nth-child(3){transition-delay:.18s;}
+  .slide.is-active .reveal:nth-child(4){transition-delay:.26s;}
+  .slide.is-active .reveal:nth-child(5){transition-delay:.34s;}
+
+  /* ---------- bottom chrome ---------- */
+  .chrome-bottom{
+    flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
+    padding:0 clamp(18px,4vw,48px) 22px;
+  }
+  .nav-btn{
+    width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line-strong);
+    background:var(--ground);color:var(--blue-deep);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .nav-btn:hover{background:var(--surface-2);transform:translateY(-1px);}
+  .nav-btn:active{transform:translateY(0) scale(.95);}
+  .nav-btn:disabled{opacity:.3;cursor:default;}
+  .nav-btn:disabled:hover{transform:none;background:var(--ground);}
+  .nav-btn svg{width:18px;height:18px;}
+
+  .dots{display:flex;gap:8px;}
+  .dots button{
+    width:8px;height:8px;border-radius:50%;background:var(--line-strong);border:none;padding:0;
+    cursor:pointer;transition:all .3s cubic-bezier(.2,.8,.2,1);
+  }
+  .dots button.is-active{width:26px;border-radius:5px;background:linear-gradient(90deg,var(--blue-mid),var(--blue-bright));}
+
+  .swipe-zone{position:absolute;top:0;bottom:0;width:18%;z-index:2;background:transparent;border:none;cursor:pointer;}
+  .swipe-zone.left{left:0;}
+  .swipe-zone.right{right:0;}
+
+  /* ---------- reusable bits ---------- */
+  .pill{display:inline-flex;align-items:center;font-family:var(--font-mono);font-size:11.5px;font-weight:600;letter-spacing:.03em;padding:3px 9px;border-radius:6px;white-space:nowrap;}
+  .pill-warn{background:var(--warn-soft);color:#c43d22;}
+  .pill-good{background:var(--good-soft);color:#0a7d59;}
+  .pill-neutral{background:var(--surface-2);color:var(--blue-deep);border:1px solid var(--line-strong);}
+
+  .citation{
+    margin-top:22px;display:flex;align-items:center;gap:8px;
+    font-family:var(--font-mono);font-size:12px;color:var(--ink-faint);
+  }
+  .citation a{color:var(--blue-mid);text-decoration:underline;text-decoration-color:var(--line-strong);text-underline-offset:3px;}
+  .citation a:hover{text-decoration-color:var(--blue-mid);}
+
+  .icon-badge{
+    width:40px;height:40px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line-strong);
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+  }
+  .icon-badge svg{width:20px;height:20px;stroke:var(--blue-deep);}
+
+  .hover-lift{transition:transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s ease;}
+  .hover-lift:hover{transform:translateY(-5px);box-shadow:0 20px 34px -18px rgba(11,25,48,.22);}
+
+  .slide-inner{position:relative;}
+  .boot-scan{
+    position:absolute;left:-6%;right:-6%;top:0;height:2px;z-index:3;
+    background:linear-gradient(90deg,transparent,var(--blue-bright),transparent);
+    opacity:0;pointer-events:none;
+    animation:bootScan 1.15s ease .1s 1 both;
+  }
+  @keyframes bootScan{
+    0%{top:-6%;opacity:0;}
+    10%{opacity:1;}
+    90%{opacity:1;}
+    100%{top:100%;opacity:0;}
+  }
+
+  .live-pill{
+    display:inline-flex;align-items:center;gap:9px;
+    background:var(--ink);color:#fff;
+    padding:9px 18px 9px 14px;border-radius:999px;
+    font-family:var(--font-mono);font-size:12.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
+  }
+  .live-pill.is-live{background:#062a1f;}
+  .live-dot{width:8px;height:8px;border-radius:50%;background:var(--warn);flex:0 0 auto;animation:livePulse 1.6s ease-out infinite;}
+  .live-pill.is-live .live-dot{background:var(--good);}
+  @keyframes livePulseGood{
+    0%{box-shadow:0 0 0 0 rgba(14,166,120,.55);}
+    70%{box-shadow:0 0 0 9px rgba(14,166,120,0);}
+    100%{box-shadow:0 0 0 0 rgba(14,166,120,0);}
+  }
+  .live-pill.is-live .live-dot{animation-name:livePulseGood;}
+  @keyframes livePulse{
+    0%{box-shadow:0 0 0 0 rgba(255,90,60,.55);}
+    70%{box-shadow:0 0 0 9px rgba(255,90,60,0);}
+    100%{box-shadow:0 0 0 0 rgba(255,90,60,0);}
+  }
+
+  .typing-dot{width:6px;height:6px;border-radius:50%;background:var(--ink-faint);display:inline-block;animation:typingBounce 1s ease-in-out infinite;}
+  .typing-dot:nth-child(2){animation-delay:.15s;}
+  .typing-dot:nth-child(3){animation-delay:.3s;}
+  @keyframes typingBounce{0%,60%,100%{transform:translateY(0);opacity:.45;}30%{transform:translateY(-4px);opacity:1;}}
+
+  .pop-in{opacity:0;transform:translateY(6px) scale(.9);transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);}
+  .pop-in.is-shown{opacity:1;transform:translateY(0) scale(1);}
+
+  .check-path{stroke-dasharray:26;stroke-dashoffset:26;transition:stroke-dashoffset .5s cubic-bezier(.4,0,.2,1);}
+  .slide.is-active .check-path{stroke-dashoffset:0;}
+
+  .now-marker{position:relative;}
+  .now-marker::after{
+    content:'';position:absolute;inset:-6px;border-radius:50%;
+    border:2px solid var(--ring-color, var(--ink-faint));opacity:0;
+    animation:nowPulse 2.2s ease-out infinite;
+  }
+  @keyframes nowPulse{0%{transform:scale(.6);opacity:.65;}100%{transform:scale(1.9);opacity:0;}}
+
+  @media (prefers-reduced-motion:reduce){
+    .boot-scan{display:none;}
+    .live-dot{animation:none;}
+    .typing-dot{animation:none;}
+    .now-marker::after{animation:none;display:none;}
+  }
+
+  @media (max-width:720px){
+    .chrome-top{padding-top:16px;}
+    .slide{padding:14px 20px;}
+    .lede{max-width:none;}
+  }
+  @media (max-width:560px){
+    .swipe-zone{width:14%;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .blob{animation:none;}
+    .track{transition:none;}
+    .reveal{transition:none;opacity:1;transform:none;}
+    .slide{transition:none;}
+  }
+</style>
+
+</head>
+<body>
+<div class="bg-fx">
+  <div class="bg-grid"></div>
+  <div class="blob-parallax" data-depth="16"><div class="blob blob-a"></div></div>
+  <div class="blob-parallax" data-depth="26"><div class="blob blob-b"></div></div>
+</div>
+
+<div class="deck">
+
+  <div class="chrome-top">
+    <div class="logo-mark" aria-label="VIVEXIA">
+      <span class="logo-wrap">
+        <span class="logo-text" data-text="VIVEXIA">VIVEXIA</span>
+      </span>
+    </div>
+    <div class="counter" id="counter"><b>01</b> / 09</div>
+  </div>
+
+  <div class="progress-rail"><div class="progress-fill" id="progressFill"></div></div>
+
+  <div class="track-viewport">
+    <button class="swipe-zone left" id="zoneLeft" aria-label="Diapositiva anterior"></button>
+    <button class="swipe-zone right" id="zoneRight" aria-label="Siguiente diapositiva"></button>
+
+    <div class="track" id="track">
+
+      <!-- 01 — COVER -->
+      <section class="slide" data-title="Portada">
+        <div class="slide-inner" style="text-align:center;">
+          <div class="boot-scan" aria-hidden="true"></div>
+          <div class="reveal logo-mark is-big" style="justify-content:center;margin-bottom:28px;">
+            <span class="logo-wrap">
+              <span class="logo-text" data-text="VIVEXIA">VIVEXIA</span>
+            </span>
+          </div>
+          <div class="eyebrow reveal" style="justify-content:center;"><span class="dot"></span>WhatsApp Business API · Actualización de precios de Meta</div>
+          <h1 class="reveal" style="font-size:clamp(34px,6.4vw,74px);line-height:1.02;font-weight:800;text-wrap:balance;">
+            WhatsApp<br><span style="color:var(--blue-mid);">empieza a cobrar</span>
+          </h1>
+          <p class="lede reveal" style="margin-left:auto;margin-right:auto;text-align:center;">
+            Desde el 1 de octubre de 2026, Meta cambia la forma en que se pagan los mensajes de negocio en WhatsApp. Esto es lo que cambia y qué hacer hoy mismo.
+          </p>
+
+          <div class="reveal" style="margin-top:34px;display:flex;flex-direction:column;align-items:center;gap:14px;">
+            <div class="live-pill" id="livePill">
+              <span class="live-dot"></span>
+              <span id="liveLabel">Empieza en</span>
+            </div>
+            <div id="countdownWrap" style="display:flex;gap:8px;font-family:var(--font-mono);"></div>
+          </div>
+
+          <div class="reveal" style="margin-top:36px;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--ink-faint);font-size:13px;">
+            <span>Desliza para ver qué cambia</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:nudge 1.4s ease-in-out infinite;"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 — EL CAMBIO EN UNA FECHA -->
+      <section class="slide" data-title="El cambio">
+        <div class="slide-inner">
+          <div class="eyebrow reveal"><span class="dot"></span>01 · La fecha que lo cambia todo</div>
+          <h2 class="headline reveal">Hoy es gratis. <em>Mañana, no.</em></h2>
+          <p class="lede reveal">Meta pasa de cobrar por "conversaciones" abiertas a cobrar por cada mensaje de negocio que envías, sin importar quién lo escriba.</p>
+
+          <div class="reveal" style="margin-top:34px;display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:center;">
+            <div class="hover-lift" style="background:var(--surface);border:1.5px solid var(--line);border-radius:18px;padding:22px 24px;">
+              <div class="pill pill-neutral" style="margin-bottom:12px;">HOY · 30 SEP 2026</div>
+              <div style="font-family:var(--font-display);font-size:clamp(22px,3vw,32px);font-weight:700;text-decoration:line-through;text-decoration-color:var(--warn);text-decoration-thickness:3px;color:var(--ink-soft);">Gratis</div>
+              <p style="margin-top:10px;color:var(--ink-soft);font-size:14.5px;">Responder dentro de las 24&nbsp;h de ventana no tiene costo.</p>
+            </div>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--blue-mid)" stroke-width="2.2" style="justify-self:center;"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="hover-lift" style="background:linear-gradient(155deg,var(--blue-deep),var(--blue-mid));border-radius:18px;padding:22px 24px;color:#fff;box-shadow:0 18px 40px -16px rgba(11,63,168,.55);">
+              <div class="pill" style="background:rgba(255,255,255,.18);color:#fff;margin-bottom:12px;">DESDE EL 1 OCT 2026</div>
+              <div style="font-family:var(--font-display);font-size:clamp(22px,3vw,32px);font-weight:700;">Se cobra</div>
+              <p style="margin-top:10px;color:rgba(255,255,255,.85);font-size:14.5px;">Cada mensaje que envía tu negocio, por separado.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 — RESPONDER YA NO ES GRATIS -->
+      <section class="slide" data-title="Ventana de 24h">
+        <div class="slide-inner" style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;">
+          <div>
+            <div class="eyebrow reveal"><span class="dot"></span>02 · Qué cambia</div>
+            <h2 class="headline reveal">Responder ya <em>no es gratis</em></h2>
+            <p class="lede reveal">Cada mensaje que tu negocio envía dentro de la ventana de 24&nbsp;h se cobra por separado. No importa si lo escribe una persona, un bot o una IA.</p>
+            <div class="citation reveal">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01" stroke-linecap="round"/></svg>
+              Mensajes de servicio, por mensaje, desde el 1 oct 2026 — Meta
+            </div>
+          </div>
+          <div class="reveal" style="background:var(--ground);border:1.5px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 24px 50px -24px rgba(11,25,48,.18);">
+            <div style="background:var(--surface);padding:12px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);">
+              <span>VENTANA DE 24 H</span><span style="color:var(--warn);font-weight:600;">COBRADOS 03</span>
+            </div>
+            <div style="padding:18px;display:flex;flex-direction:column;gap:12px;" id="chatMock"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 — PLANTILLAS DE UTILIDAD -->
+      <section class="slide" data-title="Plantillas">
+        <div class="slide-inner">
+          <div class="eyebrow reveal"><span class="dot"></span>03 · Lo que también se cobra</div>
+          <h2 class="headline reveal">Plantillas de utilidad, <em>siempre</em></h2>
+          <p class="lede reveal">Antes, dentro de la ventana de 24&nbsp;h estas plantillas salían gratis. Desde el 1 de octubre se pagan siempre, estés o no dentro de la ventana.</p>
+
+          <div class="reveal" style="margin-top:28px;border:1.5px solid var(--line);border-radius:18px;overflow:hidden;background:var(--ground);" id="utilList"></div>
+        </div>
+      </section>
+
+      <!-- 05 — LO QUE SIGUE GRATIS -->
+      <section class="slide" data-title="Gratis">
+        <div class="slide-inner">
+          <div class="eyebrow reveal"><span class="dot"></span>04 · La parte buena</div>
+          <h2 class="headline reveal">Lo que sigue <em>gratis</em></h2>
+          <p class="lede reveal">Meta mantiene una cuota gratuita de mensajes de servicio, por número, cada mes.</p>
+
+          <div class="reveal hover-lift" style="margin-top:28px;background:linear-gradient(155deg,var(--blue-deep),var(--blue-mid));border-radius:18px;padding:26px 28px;color:#fff;display:flex;align-items:baseline;gap:16px;box-shadow:0 18px 40px -18px rgba(11,63,168,.5);">
+            <div style="font-family:var(--font-mono);font-size:clamp(44px,7vw,68px);font-weight:700;font-variant-numeric:tabular-nums;" id="statFree">0</div>
+            <div style="font-size:15px;line-height:1.4;max-width:30ch;opacity:.92;">mensajes de servicio gratis al mes, por cada número de WhatsApp</div>
+          </div>
+
+          <div class="reveal" style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div style="border:1.5px solid var(--line);border-radius:16px;padding:20px 22px;">
+              <div style="font-family:var(--font-mono);font-size:30px;font-weight:600;color:var(--blue-deep);">US$0</div>
+              <p style="margin-top:6px;color:var(--ink-soft);font-size:14px;">Lo que te escribe el cliente primero. Los mensajes entrantes nunca se cobran.</p>
+            </div>
+            <div style="border:1.5px solid var(--line);border-radius:16px;padding:20px 22px;">
+              <div style="display:flex;align-items:baseline;gap:8px;">
+                <span style="font-family:var(--font-mono);font-size:30px;font-weight:600;color:var(--blue-deep);" id="statDaily">0</span>
+                <span class="pill pill-warn">se acaban rápido</span>
+              </div>
+              <p style="margin-top:6px;color:var(--ink-soft);font-size:14px;">al día si repartes los 1,000 a lo largo del mes. La cuota no se acumula.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 06 — SIN TARJETA -->
+      <section class="slide" data-title="Facturación">
+        <div class="slide-inner">
+          <div class="eyebrow reveal"><span class="dot"></span>05 · Urgente, hoy</div>
+          <h2 class="headline reveal">Sin tarjeta, <em>tu bot se calla</em></h2>
+          <p class="lede reveal">Sin un método de pago activo, Meta no te cobra — pero tampoco entrega tus respuestas. El bot deja de hablar.</p>
+          <div class="citation reveal">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01" stroke-linecap="round"/></svg>
+            Sin método de pago, los mensajes dejan de entregarse — Meta
+          </div>
+
+          <div class="reveal" style="margin-top:26px;border:1.5px solid var(--line);border-radius:18px;overflow:hidden;background:var(--ground);" id="billingList"></div>
+        </div>
+      </section>
+
+      <!-- 07 — UNA RESPUESTA, UN MENSAJE -->
+      <section class="slide" data-title="Eficiencia">
+        <div class="slide-inner">
+          <div class="eyebrow reveal"><span class="dot"></span>06 · Haz que tu bot hable menos</div>
+          <h2 class="headline reveal">Una respuesta, <em>un mensaje</em></h2>
+          <p class="lede reveal">Nada de "ok" o "un momento" sueltos. Junta la idea en un solo envío y cambia los menús de ida y vuelta por WhatsApp Flows.</p>
+
+          <div class="reveal" style="margin-top:26px;display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch;">
+            <div class="hover-lift" style="border:1.5px solid var(--line);border-radius:16px;padding:20px;">
+              <div style="font-weight:600;font-size:14px;color:var(--ink-soft);margin-bottom:14px;">Así pagas de más</div>
+              <div style="display:flex;flex-direction:column;gap:8px;" id="wasteBubbles"></div>
+              <div class="pop-in" id="wasteCount" style="margin-top:14px;font-family:var(--font-mono);font-size:26px;font-weight:600;color:var(--warn);">4 <span style="font-size:13px;font-weight:500;color:var(--ink-faint);">mensajes</span></div>
+            </div>
+            <div class="hover-lift" style="border-radius:16px;padding:20px;background:linear-gradient(155deg,var(--blue-deep),var(--blue-mid));color:#fff;box-shadow:0 18px 40px -18px rgba(11,63,168,.5);">
+              <div style="font-weight:600;font-size:14px;opacity:.85;margin-bottom:14px;">Así pagas lo justo</div>
+              <div id="justBubble" style="min-height:2.7em;"></div>
+              <div class="pop-in" id="justCount" style="margin-top:14px;font-family:var(--font-mono);font-size:26px;font-weight:600;">1 <span style="font-size:13px;font-weight:500;opacity:.8;">mensaje</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 08 — CLICK TO WHATSAPP -->
+      <section class="slide" data-title="Anuncios">
+        <div class="slide-inner">
+          <div class="eyebrow reveal"><span class="dot"></span>07 · Tu mejor aliado ahora</div>
+          <h2 class="headline reveal">Clic-para-WhatsApp: <em>72&nbsp;h gratis</em></h2>
+          <p class="lede reveal">Cuando la conversación nace de un anuncio de clic a WhatsApp, Meta no cobra esos mensajes durante 72&nbsp;horas. Antes era un extra; hoy es la forma más barata de atender.</p>
+
+          <div class="reveal" style="margin-top:26px;display:flex;flex-direction:column;gap:14px;">
+            <div style="border:1.5px solid var(--line);border-radius:14px;padding:16px 18px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <span style="font-weight:600;font-size:13.5px;">Chat normal</span>
+                <span class="pill pill-warn">cada mensaje se cobra</span>
+              </div>
+              <div class="timeline" id="timelinePaid"></div>
+            </div>
+            <div style="border-radius:14px;padding:16px 18px;background:var(--good-soft);border:1.5px solid #a7e8cf;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <span style="font-weight:600;font-size:13.5px;">Desde un anuncio</span>
+                <span class="pill pill-good">gratis</span>
+              </div>
+              <div class="timeline" id="timelineFree"></div>
+            </div>
+          </div>
+          <div class="citation reveal">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01" stroke-linecap="round"/></svg>
+            Anuncios de clic a WhatsApp, ventana de 72&nbsp;h sin cobro — Meta
+          </div>
+        </div>
+      </section>
+
+      <!-- 09 — CIERRE / CTA + FUENTE -->
+      <section class="slide" data-title="Cierre">
+        <div class="slide-inner">
+          <div class="eyebrow reveal"><span class="dot"></span>08 · Qué hacer hoy</div>
+          <h2 class="headline reveal">Prepara tu bot <em>antes del 1 de octubre</em></h2>
+
+          <div class="reveal" style="margin-top:22px;display:flex;flex-direction:column;gap:10px;" id="checklist"></div>
+
+          <div class="reveal" style="margin-top:28px;border:1.5px solid var(--line-strong);background:var(--surface);border-radius:16px;padding:20px 22px;display:flex;gap:16px;align-items:flex-start;">
+            <div class="icon-badge" style="background:#fff;">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M4 19V6a2 2 0 0 1 2-2h8l6 6v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M14 4v5h5M8 13h8M8 17h5"/></svg>
+            </div>
+            <div>
+              <div style="font-weight:600;font-size:14px;margin-bottom:4px;">Fuente oficial citada en esta presentación</div>
+              <p style="color:var(--ink-soft);font-size:13.5px;line-height:1.5;">Meta for Developers — Precios de mensajes fuera de plantilla, WhatsApp Business Platform.</p>
+              <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing/non-template-messages" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-family:var(--font-mono);font-size:12.5px;font-weight:600;word-break:break-all;">
+                developers.facebook.com/.../pricing/non-template-messages
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex:0 0 auto;"><path d="M7 17 17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+          </div>
+
+          <p class="reveal" style="margin-top:20px;font-size:13px;color:var(--ink-faint);">Presentación preparada por VIVEXIA · automatización e IA para negocios.</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="chrome-bottom">
+    <button class="nav-btn" id="prevBtn" aria-label="Anterior">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="dots" id="dots"></div>
+    <button class="nav-btn" id="nextBtn" aria-label="Siguiente">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</div>
+
+<style>
+  .timeline{position:relative;height:30px;}
+  .timeline .axis{position:absolute;left:0;right:0;top:50%;height:2px;background:var(--line-strong);transform:translateY(-50%);}
+  .timeline .mark{position:absolute;top:50%;transform:translate(-50%,-50%) scale(0);width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:transform .4s cubic-bezier(.34,1.56,.64,1);}
+  .slide.is-active .timeline .mark{transform:translate(-50%,-50%) scale(1);}
+  .timeline .mark svg{width:10px;height:10px;}
+  .timeline .tlabel{position:absolute;top:100%;transform:translateX(-50%);font-family:var(--font-mono);font-size:10.5px;color:var(--ink-faint);margin-top:4px;}
+
+  .traveler{
+    position:absolute;top:50%;left:0;width:13px;height:13px;border-radius:50%;
+    transform:translate(-50%,-50%);z-index:3;opacity:0;
+    box-shadow:0 0 0 3px #fff, 0 2px 6px rgba(11,25,48,.3);
+  }
+  .traveler.paid{background:var(--warn);}
+  .traveler.free{background:var(--good);}
+  .traveler.is-on{opacity:1;}
+  .traveler.is-bursting{animation:travelerBurst .5s ease-out forwards;}
+  @keyframes travelerBurst{
+    0%{transform:translate(-50%,-50%) scale(1);opacity:1;}
+    35%{transform:translate(-50%,-50%) scale(1.9);opacity:1;}
+    100%{transform:translate(-50%,-50%) scale(2.8);opacity:0;}
+  }
+  .burst-ring{
+    position:absolute;top:50%;left:0;width:13px;height:13px;border-radius:50%;
+    transform:translate(-50%,-50%) scale(.4);opacity:0;pointer-events:none;z-index:2;
+    border:2px solid var(--warn);
+  }
+  .burst-ring.is-active{animation:burstRing .6s ease-out forwards;}
+  .burst-ring.is-soft{border-color:var(--good);}
+  .burst-ring.is-soft.is-active{animation:burstRingSoft .7s ease-out forwards;}
+  @keyframes burstRing{
+    0%{transform:translate(-50%,-50%) scale(.4);opacity:.95;}
+    100%{transform:translate(-50%,-50%) scale(3.4);opacity:0;}
+  }
+  @keyframes burstRingSoft{
+    0%{transform:translate(-50%,-50%) scale(.5);opacity:.8;}
+    100%{transform:translate(-50%,-50%) scale(2.2);opacity:0;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .traveler{display:none;}
+    .burst-ring{display:none;}
+  }
+
+  @keyframes nudge{0%,100%{transform:translateX(0);}50%{transform:translateX(5px);}}
+
+  .chat-row{display:flex;gap:8px;align-items:flex-end;opacity:0;transform:translateY(8px);transition:opacity .4s ease,transform .4s ease;}
+  .slide.is-active .chat-row{opacity:1;transform:translateY(0);}
+  .chat-bubble{max-width:72%;padding:9px 12px;border-radius:12px;font-size:13.5px;line-height:1.4;}
+  .chat-row.out{justify-content:flex-end;}
+  .chat-row.out .chat-bubble{background:var(--surface-2);border-bottom-right-radius:3px;}
+  .chat-row.in .chat-bubble{background:var(--surface);border-bottom-left-radius:3px;}
+
+  .row-item{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid var(--line);opacity:0;transform:translateX(-10px);transition:opacity .4s ease,transform .4s ease;}
+  .row-item:last-child{border-bottom:none;}
+  .slide.is-active .row-item{opacity:1;transform:translateX(0);}
+</style>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total = slides.length;
+  var track = document.getElementById('track');
+  var dotsWrap = document.getElementById('dots');
+  var counterEl = document.getElementById('counter');
+  var progressFill = document.getElementById('progressFill');
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  var current = 0;
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  for (var i = 0; i < total; i++) {
+    var d = document.createElement('button');
+    d.setAttribute('aria-label', 'Ir a la diapositiva ' + (i+1));
+    if (i === 0) d.classList.add('is-active');
+    (function(idx){ d.addEventListener('click', function(){ goTo(idx); }); })(i);
+    dotsWrap.appendChild(d);
+  }
+  var dotEls = Array.prototype.slice.call(dotsWrap.children);
+
+  function pad(n){ return n < 10 ? '0' + n : '' + n; }
+
+  function render(){
+    track.style.transform = 'translateX(-' + (current * 100) + '%)';
+    slides.forEach(function(s, idx){ s.classList.toggle('is-active', idx === current); });
+    dotEls.forEach(function(d, idx){ d.classList.toggle('is-active', idx === current); });
+    counterEl.innerHTML = '<b>' + pad(current+1) + '</b> / ' + pad(total);
+    progressFill.style.width = ((current+1) / total * 100) + '%';
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+    triggerSlideEffects(current);
+  }
+
+  function goTo(idx){
+    current = Math.max(0, Math.min(total - 1, idx));
+    render();
+  }
+  function next(){ goTo(current + 1); }
+  function prev(){ goTo(current - 1); }
+
+  prevBtn.addEventListener('click', prev);
+  nextBtn.addEventListener('click', next);
+  document.getElementById('zoneLeft').addEventListener('click', prev);
+  document.getElementById('zoneRight').addEventListener('click', next);
+
+  window.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight') next();
+    else if (e.key === 'ArrowLeft') prev();
+    else if (e.key === 'Home') goTo(0);
+    else if (e.key === 'End') goTo(total - 1);
+  });
+
+  var touchStartX = null;
+  document.querySelector('.track-viewport').addEventListener('touchstart', function(e){
+    touchStartX = e.changedTouches[0].clientX;
+  }, {passive:true});
+  document.querySelector('.track-viewport').addEventListener('touchend', function(e){
+    if (touchStartX === null) return;
+    var dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) { dx < 0 ? next() : prev(); }
+    touchStartX = null;
+  }, {passive:true});
+
+  /* ---------- live status: counts down to Oct 1, then counts up ("cobrando desde hoy") ---------- */
+  var target = new Date(2026, 9, 1, 0, 0, 0);
+  var countdownWrap = document.getElementById('countdownWrap');
+  var livePill = document.getElementById('livePill');
+  var liveLabel = document.getElementById('liveLabel');
+  var units = [
+    {key:'d', label:'días'},
+    {key:'h', label:'horas'},
+    {key:'m', label:'min'},
+    {key:'s', label:'seg'}
+  ];
+  units.forEach(function(u){
+    var box = document.createElement('div');
+    box.style.cssText = 'background:var(--surface);border:1px solid var(--line-strong);border-radius:10px;padding:8px 12px;min-width:58px;text-align:center;';
+    box.innerHTML = '<div style="font-size:20px;font-weight:700;color:var(--blue-deep);font-variant-numeric:tabular-nums;" data-u="'+u.key+'">00</div><div style="font-size:9.5px;letter-spacing:.06em;color:var(--ink-faint);text-transform:uppercase;margin-top:2px;">'+u.label+'</div>';
+    countdownWrap.appendChild(box);
+  });
+  liveLabel.textContent = 'Se está cobrando desde hoy';
+  livePill.classList.add('is-live');
+  function tickCountdown(){
+    var now = new Date();
+    var diff = Math.max(0, now - target);
+    var d = Math.floor(diff / 86400000);
+    var h = Math.floor((diff % 86400000) / 3600000);
+    var m = Math.floor((diff % 3600000) / 60000);
+    var s = Math.floor((diff % 60000) / 1000);
+    var vals = {d:d,h:h,m:m,s:s};
+    units.forEach(function(u){
+      var el = countdownWrap.querySelector('[data-u="'+u.key+'"]');
+      if (el) el.textContent = pad(vals[u.key]);
+    });
+  }
+  tickCountdown();
+  setInterval(tickCountdown, 1000);
+
+  /* ---------- count-up numbers (slide "lo que sigue gratis"); replays on every visit ---------- */
+  function countUp(el, targetVal, duration){
+    if (!el) return;
+    if (reduced){ el.textContent = targetVal.toLocaleString('es'); return; }
+    var token = {};
+    el._countUpToken = token;
+    el.textContent = '0';
+    var startTime = null;
+    function step(ts){
+      if (el._countUpToken !== token) return;
+      if (!startTime) startTime = ts;
+      var progress = Math.min(1, (ts - startTime) / duration);
+      var eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(eased * targetVal).toLocaleString('es');
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ---------- chat window: types one message at a time, replays on every visit ---------- */
+  var chatSeq = 0;
+  var chatTimers = [];
+  function runChatSequence(){
+    var mySeq = ++chatSeq;
+    chatTimers.forEach(clearTimeout);
+    chatTimers = [];
+    var chatMock = document.getElementById('chatMock');
+    chatMock.innerHTML = '';
+    var chatData = [
+      {dir:'in', text:'Hola, ¿lo tienen disponible?'},
+      {dir:'out', text:'Sí, nos quedan dos unidades.'},
+      {dir:'out', text:'Te paso el catálogo completo.'},
+      {dir:'out', text:'Te lo aparto hasta mañana.'}
+    ];
+    var delay = 0;
+    chatData.forEach(function(m){
+      var row = document.createElement('div');
+      row.className = 'chat-row ' + m.dir;
+      row.style.opacity = '0';
+      row.style.transform = 'translateY(8px)';
+      row.style.transition = 'opacity .35s ease, transform .35s ease';
+      if (m.dir === 'out' && !reduced) {
+        row.innerHTML = '<div class="chat-bubble typing"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>';
+      } else if (m.dir === 'out') {
+        row.innerHTML = '<span class="pill pill-warn" style="margin-right:6px;">se cobra</span><div class="chat-bubble">' + m.text + '</div>';
+      } else {
+        row.innerHTML = '<div class="chat-bubble">' + m.text + '</div><span class="pill pill-good" style="margin-left:6px;">gratis</span>';
+      }
+      chatMock.appendChild(row);
+
+      var showAt = reduced ? 0 : delay;
+      chatTimers.push(setTimeout(function(){
+        if (chatSeq !== mySeq) return;
+        row.style.opacity = '1';
+        row.style.transform = 'translateY(0)';
+      }, showAt));
+
+      if (m.dir === 'out' && !reduced) {
+        chatTimers.push(setTimeout(function(){
+          if (chatSeq !== mySeq) return;
+          row.innerHTML = '<span class="pill pill-warn" style="margin-right:6px;">se cobra</span><div class="chat-bubble">' + m.text + '</div>';
+        }, delay + 900));
+        delay += 1500;
+      } else {
+        delay += 650;
+      }
+    });
+  }
+
+  /* ---------- "así pagas de más" bubbles: same typing effect, replays on every visit ---------- */
+  var wasteSeq = 0;
+  var wasteTimers = [];
+  function runWasteSequence(){
+    var mySeq = ++wasteSeq;
+    wasteTimers.forEach(clearTimeout);
+    wasteTimers = [];
+    var wrap = document.getElementById('wasteBubbles');
+    wrap.innerHTML = '';
+    var countEl = document.getElementById('wasteCount');
+    if (countEl) countEl.classList.remove('is-shown');
+    var msgs = ['Ok', 'Perfecto', 'Un momento', 'Tu pedido sale mañana'];
+    var delay = 0;
+    msgs.forEach(function(t){
+      var row = document.createElement('div');
+      row.className = 'chat-row out';
+      row.style.opacity = '0';
+      row.style.transform = 'translateY(8px)';
+      row.style.transition = 'opacity .35s ease, transform .35s ease';
+      if (!reduced) {
+        row.innerHTML = '<div class="chat-bubble typing" style="background:var(--surface-2);"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>';
+      } else {
+        row.innerHTML = '<div class="chat-bubble" style="background:var(--surface-2);">' + t + '</div>';
+      }
+      wrap.appendChild(row);
+
+      var showAt = reduced ? 0 : delay;
+      wasteTimers.push(setTimeout(function(){
+        if (wasteSeq !== mySeq) return;
+        row.style.opacity = '1';
+        row.style.transform = 'translateY(0)';
+      }, showAt));
+
+      if (!reduced) {
+        wasteTimers.push(setTimeout(function(){
+          if (wasteSeq !== mySeq) return;
+          row.innerHTML = '<div class="chat-bubble" style="background:var(--surface-2);">' + t + '</div>';
+        }, delay + 550));
+        delay += 950;
+      } else {
+        delay += 500;
+      }
+    });
+
+    if (countEl) {
+      if (reduced) {
+        countEl.classList.add('is-shown');
+      } else {
+        var totalMsgTime = (msgs.length - 1) * 950 + 550;
+        wasteTimers.push(setTimeout(function(){
+          if (wasteSeq !== mySeq) return;
+          countEl.classList.add('is-shown');
+        }, totalMsgTime + 150));
+      }
+    }
+  }
+
+  /* ---------- list reveals: one row at a time, timed by JS so it reliably replays ---------- */
+  var staggerSeq = {};
+  function runStaggerReveal(containerId, rowsHtml, gap, extraStyle){
+    staggerSeq[containerId] = (staggerSeq[containerId] || 0) + 1;
+    var mySeq = staggerSeq[containerId];
+    var container = document.getElementById(containerId);
+    container.innerHTML = '';
+    rowsHtml.forEach(function(html, idx){
+      var row = document.createElement('div');
+      row.className = 'row-item';
+      if (extraStyle) row.style.cssText += extraStyle;
+      row.innerHTML = html;
+      row.style.opacity = '0';
+      row.style.transform = 'translateX(-10px)';
+      container.appendChild(row);
+      var t = reduced ? 0 : idx * gap;
+      setTimeout(function(){
+        if (staggerSeq[containerId] !== mySeq) return;
+        row.style.opacity = '1';
+        row.style.transform = 'translateX(0)';
+        var cp = row.querySelector('.check-path');
+        if (cp) cp.style.strokeDashoffset = '0';
+      }, t);
+    });
+  }
+
+  var utilData = [
+    {icon:'<path d="M8 2v4M16 2v4M3 10h18M5 6h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"/>', text:'Confirmaciones de pedido o de cita'},
+    {icon:'<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/>', text:'Recordatorios de pago o de cita'},
+    {icon:'<path d="M3 7h13v8H3zM16 10h4l3 3v2h-7zM5.5 19a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM18.5 19a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>', text:'Avisos de envío y actualización de estado'}
+  ];
+  var billingData = [
+    {icon:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>', text:'Revisa tu tarjeta en el Billing Hub de Meta', tag:'hoy', tagType:'warn'},
+    {icon:'<path d="M3 10h18M3 6h18v12H3z"/><path d="M7 14h.01"/>', text:'ManyChat o GoHighLevel: wallet con saldo y recarga automática', tag:'hoy', tagType:'warn'},
+    {icon:'<path d="M3 3l18 18M10.5 10.9A4.5 4.5 0 0 0 12 19.5M8 6.3A8 8 0 0 1 20 12M3.5 8.5A8 8 0 0 0 3 12"/>', text:'Sin pago activo, tus respuestas no se entregan', tag:'se corta', tagType:'warn'}
+  ];
+  var checkData = [
+    'Confirma un método de pago activo en el Billing Hub de Meta',
+    'Audita tus flujos: une mensajes sueltos en una sola respuesta',
+    'Cambia menús de ida y vuelta por WhatsApp Flows',
+    'Dirige tráfico con anuncios de clic a WhatsApp (72 h sin costo)',
+    'Vigila tu cuota de 1,000 mensajes gratis antes de que se agote'
+  ];
+
+  function runUtilReveal(){
+    runStaggerReveal('utilList', utilData.map(function(item){
+      return '<div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue-deep)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + item.icon + '</svg></div><div style="flex:1;font-size:14.5px;">' + item.text + '</div><span class="pill pill-warn">se paga</span>';
+    }), 650);
+  }
+  function runBillingReveal(){
+    runStaggerReveal('billingList', billingData.map(function(item){
+      return '<div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue-deep)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + item.icon + '</svg></div><div style="flex:1;font-size:14.5px;">' + item.text + '</div><span class="pill pill-' + item.tagType + '">' + item.tag + '</span>';
+    }), 650);
+  }
+  function runChecklistReveal(){
+    runStaggerReveal('checklist', checkData.map(function(text){
+      return '<div class="icon-badge" style="width:30px;height:30px;border-radius:8px;"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue-deep)" stroke-width="2.2"><path class="check-path" d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div style="flex:1;font-size:14.5px;">' + text + '</div>';
+    }), 550, 'border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;');
+  }
+
+  /* ---------- "así pagas lo justo": types in only after the waste sequence finishes ---------- */
+  var justSeq = 0;
+  function runJustSequence(afterMs){
+    var mySeq = ++justSeq;
+    var el = document.getElementById('justBubble');
+    if (!el) return;
+    el.innerHTML = '';
+    var text = 'Perfecto, tu pedido sale mañana. Te aviso cuando vaya en camino.';
+    var countEl = document.getElementById('justCount');
+    if (countEl) countEl.classList.remove('is-shown');
+    if (reduced) {
+      el.innerHTML = '<div class="chat-bubble" style="background:rgba(255,255,255,.12);max-width:100%;">' + text + '</div>';
+      if (countEl) countEl.classList.add('is-shown');
+      return;
+    }
+    setTimeout(function(){
+      if (justSeq !== mySeq) return;
+      el.innerHTML = '<div class="chat-bubble typing" style="background:rgba(255,255,255,.18);max-width:100%;"><span class="typing-dot" style="background:rgba(255,255,255,.75);"></span><span class="typing-dot" style="background:rgba(255,255,255,.75);"></span><span class="typing-dot" style="background:rgba(255,255,255,.75);"></span></div>';
+      setTimeout(function(){
+        if (justSeq !== mySeq) return;
+        el.innerHTML = '<div class="chat-bubble" style="background:rgba(255,255,255,.12);max-width:100%;">' + text + '</div>';
+        if (countEl) countEl.classList.add('is-shown');
+      }, 650);
+    }, afterMs);
+  }
+
+  /* ---------- build dynamic slide content ---------- */
+  function buildOnce(){
+    function buildTimeline(elId, free){
+      var el = document.getElementById(elId);
+      el.innerHTML = '<div class="axis"></div>';
+      var hours = [0,24,48,72];
+      hours.forEach(function(h, idx){
+        var mark = document.createElement('div');
+        mark.className = 'mark' + (h===0 ? ' now-marker' : '');
+        mark.style.left = (h/72*100) + '%';
+        mark.style.transitionDelay = (idx * 0.12) + 's';
+        mark.style.background = free ? 'var(--good)' : (h===0 ? 'var(--line-strong)' : 'var(--warn)');
+        if (h===0) mark.style.setProperty('--ring-color', free ? 'var(--good)' : 'var(--ink-faint)');
+        var iconSvg = free
+          ? '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+          : (h===0 ? '' : '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/><circle cx="12" cy="12" r="3.3" fill="#fff" stroke="none"/></svg>');
+        mark.innerHTML = iconSvg;
+        var label = document.createElement('div');
+        label.className = 'tlabel';
+        label.style.left = (h/72*100) + '%';
+        label.textContent = h + 'h';
+        el.appendChild(mark);
+        el.appendChild(label);
+      });
+      var traveler = document.createElement('div');
+      traveler.className = 'traveler ' + (free ? 'free' : 'paid');
+      el.appendChild(traveler);
+      var burst = document.createElement('div');
+      burst.className = 'burst-ring';
+      el.appendChild(burst);
+    }
+    buildTimeline('timelinePaid', false);
+    buildTimeline('timelineFree', true);
+  }
+
+  /* ---------- timeline travelers: paid one races to 24h and bursts, free one rides all the way to 72h ---------- */
+  var travelSeq = 0;
+  function animatePosition(el, fromPct, toPct, duration, token, onDone){
+    var start = null;
+    function step(ts){
+      if (travelSeq !== token) return;
+      if (!start) start = ts;
+      var p = Math.min(1, (ts - start) / duration);
+      var eased = 1 - Math.pow(1 - p, 2);
+      el.style.left = (fromPct + (toPct - fromPct) * eased) + '%';
+      if (p < 1) requestAnimationFrame(step); else if (onDone) onDone();
+    }
+    requestAnimationFrame(step);
+  }
+  function runTimelineTravel(){
+    var mySeq = ++travelSeq;
+    var paidT = document.querySelector('#timelinePaid .traveler');
+    var paidB = document.querySelector('#timelinePaid .burst-ring');
+    var freeT = document.querySelector('#timelineFree .traveler');
+    var freeB = document.querySelector('#timelineFree .burst-ring');
+    if (!paidT || !freeT) return;
+
+    [paidT, freeT].forEach(function(t){ t.classList.remove('is-on', 'is-bursting'); t.style.left = '0%'; t.style.opacity = ''; });
+    [paidB, freeB].forEach(function(b){ if (b) { b.classList.remove('is-active', 'is-soft'); } });
+
+    if (reduced) return;
+
+    setTimeout(function(){
+      if (travelSeq !== mySeq) return;
+      paidT.classList.add('is-on');
+      animatePosition(paidT, 0, (24 / 72 * 100), 1200, mySeq, function(){
+        if (travelSeq !== mySeq) return;
+        paidT.classList.add('is-bursting');
+        if (paidB) {
+          paidB.style.left = (24 / 72 * 100) + '%';
+          void paidB.offsetWidth;
+          paidB.classList.add('is-active');
+        }
+      });
+
+      freeT.classList.add('is-on');
+      animatePosition(freeT, 0, 100, 2300, mySeq, function(){
+        if (travelSeq !== mySeq) return;
+        freeT.style.opacity = '0';
+        if (freeB) {
+          freeB.classList.add('is-soft');
+          freeB.style.left = '100%';
+          void freeB.offsetWidth;
+          freeB.classList.add('is-active');
+        }
+      });
+    }, 300);
+  }
+
+  function triggerSlideEffects(idx){
+    var slide = slides[idx];
+    var title = slide.getAttribute('data-title');
+    if (title === 'Gratis') {
+      countUp(document.getElementById('statFree'), 1000, 1100);
+      countUp(document.getElementById('statDaily'), 33, 900);
+    }
+    if (title === 'Ventana de 24h') {
+      runChatSequence();
+    }
+    if (title === 'Plantillas') {
+      runUtilReveal();
+    }
+    if (title === 'Facturación') {
+      runBillingReveal();
+    }
+    if (title === 'Cierre') {
+      runChecklistReveal();
+    }
+    if (title === 'Eficiencia') {
+      runWasteSequence();
+      runJustSequence(3700);
+    }
+    if (title === 'Anuncios') {
+      runTimelineTravel();
+    }
+  }
+
+  /* ---------- subtle cursor parallax on background blobs ---------- */
+  var parallaxEls = Array.prototype.slice.call(document.querySelectorAll('.blob-parallax'));
+  if (!reduced && parallaxEls.length) {
+    var rafPending = false, lastX = 0.5, lastY = 0.5;
+    window.addEventListener('mousemove', function(e){
+      lastX = e.clientX / window.innerWidth;
+      lastY = e.clientY / window.innerHeight;
+      if (!rafPending) {
+        rafPending = true;
+        requestAnimationFrame(function(){
+          rafPending = false;
+          parallaxEls.forEach(function(el){
+            var depth = parseFloat(el.dataset.depth) || 20;
+            var dx = (lastX - 0.5) * depth;
+            var dy = (lastY - 0.5) * depth;
+            el.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)';
+          });
+        });
+      }
+    });
+  }
+
+  buildOnce();
+  render();
+})();
+</script>
+</body>
+</html>
