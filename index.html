@@ -77,25 +77,17 @@
     padding:22px clamp(18px,4vw,48px) 0;
     flex:0 0 auto;
   }
-  .logo-mark{display:flex;align-items:center;}
-  .logo-wrap{position:relative;display:inline-block;}
-  .logo-text{
-    position:relative;display:block;white-space:nowrap;
-    font-family:var(--font-display);font-weight:800;font-size:19px;letter-spacing:-.02em;
-    background:linear-gradient(115deg,var(--blue-glow) 0%,var(--blue-mid) 45%,var(--blue-deep) 85%);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
+  .logo-mark{display:flex;align-items:center;cursor:pointer;}
+  .logo-img{
+    height:22px;
+    width:auto;
+    display:block;
+    object-fit:contain;
   }
-  .logo-text::after{
-    content:attr(data-text);position:absolute;inset:0;
-    background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.9) 50%,transparent 65%);
-    background-size:260% 100%;background-position:-120% 0;
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-    mix-blend-mode:overlay;pointer-events:none;
-    animation:logoShine 2.2s ease .7s 1 both;
+  .logo-mark.is-big .logo-img{
+    height:50px;
+    width:auto;
   }
-  @keyframes logoShine{ to{ background-position:120% 0; } }
-  .logo-mark.is-big .logo-text{font-size:42px;}
-  @media (prefers-reduced-motion:reduce){ .logo-text::after{animation:none;background-position:120% 0;} }
   .counter{
     font-family:var(--font-mono);font-size:13px;color:var(--ink-faint);
     letter-spacing:.04em;font-variant-numeric:tabular-nums;
@@ -154,20 +146,63 @@
     width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line-strong);
     background:var(--ground);color:var(--blue-deep);cursor:pointer;
     display:flex;align-items:center;justify-content:center;
-    transition:transform .15s ease, background .15s ease, border-color .15s ease;
+    transition:background .15s ease, border-color .15s ease, transform .15s ease;
   }
-  .nav-btn:hover{background:var(--surface-2);transform:translateY(-1px);}
-  .nav-btn:active{transform:translateY(0) scale(.95);}
+  .nav-btn:hover{background:var(--surface-2);}
+  .nav-btn:active{transform:scale(.95);}
   .nav-btn:disabled{opacity:.3;cursor:default;}
   .nav-btn:disabled:hover{transform:none;background:var(--ground);}
   .nav-btn svg{width:18px;height:18px;}
 
-  .dots{display:flex;gap:8px;}
+  .dots{display:flex;gap:8px;align-items:center;}
   .dots button{
+    position:relative;
     width:8px;height:8px;border-radius:50%;background:var(--line-strong);border:none;padding:0;
-    cursor:pointer;transition:all .3s cubic-bezier(.2,.8,.2,1);
+    cursor:pointer;transition:width .3s cubic-bezier(.2,.8,.2,1), border-radius .3s cubic-bezier(.2,.8,.2,1), background .3s cubic-bezier(.2,.8,.2,1);
+  }
+  .dots button::before{
+    content:'';position:absolute;inset:-10px -5px;border-radius:999px;
   }
   .dots button.is-active{width:26px;border-radius:5px;background:linear-gradient(90deg,var(--blue-mid),var(--blue-bright));}
+
+  /* Custom non-native tooltip component */
+  .dot-tooltip{
+    position:absolute;
+    bottom:calc(100% + 12px);
+    left:50%;
+    transform:translateX(-50%) translateY(4px);
+    background:var(--ink);
+    color:#fff;
+    font-family:var(--font-body);
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    padding:5px 10px;
+    border-radius:7px;
+    white-space:nowrap;
+    pointer-events:none;
+    opacity:0;
+    visibility:hidden;
+    transition:opacity .18s ease, transform .18s cubic-bezier(.2,.8,.2,1), visibility .18s;
+    box-shadow:0 8px 20px -4px rgba(11,25,48,.35);
+    z-index:99;
+  }
+  .dot-tooltip::after{
+    content:'';
+    position:absolute;
+    top:100%;
+    left:50%;
+    transform:translateX(-50%);
+    border-width:5px 5px 0 5px;
+    border-style:solid;
+    border-color:var(--ink) transparent transparent transparent;
+  }
+  .dots button:hover .dot-tooltip,
+  .dots button:focus-visible .dot-tooltip{
+    opacity:1;
+    visibility:visible;
+    transform:translateX(-50%) translateY(0);
+  }
 
   .swipe-zone{position:absolute;top:0;bottom:0;width:18%;z-index:2;background:transparent;border:none;cursor:pointer;}
   .swipe-zone.left{left:0;}
@@ -192,8 +227,8 @@
   }
   .icon-badge svg{width:20px;height:20px;stroke:var(--blue-deep);}
 
-  .hover-lift{transition:transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s ease;}
-  .hover-lift:hover{transform:translateY(-5px);box-shadow:0 20px 34px -18px rgba(11,25,48,.22);}
+  .hover-lift{transition:box-shadow .2s ease;}
+  .hover-lift:hover{box-shadow:0 12px 28px -14px rgba(11,25,48,.16);}
 
   .slide-inner{position:relative;}
   .boot-scan{
@@ -284,10 +319,8 @@
 <div class="deck">
 
   <div class="chrome-top">
-    <div class="logo-mark" aria-label="VIVEXIA">
-      <span class="logo-wrap">
-        <span class="logo-text" data-text="VIVEXIA">VIVEXIA</span>
-      </span>
+    <div class="logo-mark" id="logoTop" aria-label="VIVEXIA" role="button" tabindex="0">
+      <img src="vivexia-black.png" alt="VIVEXIA" class="logo-img">
     </div>
     <div class="counter" id="counter"><b>01</b> / 09</div>
   </div>
@@ -305,9 +338,7 @@
         <div class="slide-inner" style="text-align:center;">
           <div class="boot-scan" aria-hidden="true"></div>
           <div class="reveal logo-mark is-big" style="justify-content:center;margin-bottom:28px;">
-            <span class="logo-wrap">
-              <span class="logo-text" data-text="VIVEXIA">VIVEXIA</span>
-            </span>
+            <img src="vivexia-black.png" alt="VIVEXIA" class="logo-img">
           </div>
           <div class="eyebrow reveal" style="justify-content:center;"><span class="dot"></span>WhatsApp Business API · Actualización de precios de Meta</div>
           <h1 class="reveal" style="font-size:clamp(34px,6.4vw,74px);line-height:1.02;font-weight:800;text-wrap:balance;">
@@ -438,12 +469,12 @@
           <p class="lede reveal">Nada de "ok" o "un momento" sueltos. Junta la idea en un solo envío y cambia los menús de ida y vuelta por WhatsApp Flows.</p>
 
           <div class="reveal" style="margin-top:26px;display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch;">
-            <div class="hover-lift" style="border:1.5px solid var(--line);border-radius:16px;padding:20px;">
+            <div style="border:1.5px solid var(--line);border-radius:16px;padding:20px;background:var(--ground);">
               <div style="font-weight:600;font-size:14px;color:var(--ink-soft);margin-bottom:14px;">Así pagas de más</div>
               <div style="display:flex;flex-direction:column;gap:8px;" id="wasteBubbles"></div>
               <div class="pop-in" id="wasteCount" style="margin-top:14px;font-family:var(--font-mono);font-size:26px;font-weight:600;color:var(--warn);">4 <span style="font-size:13px;font-weight:500;color:var(--ink-faint);">mensajes</span></div>
             </div>
-            <div class="hover-lift" style="border-radius:16px;padding:20px;background:linear-gradient(155deg,var(--blue-deep),var(--blue-mid));color:#fff;box-shadow:0 18px 40px -18px rgba(11,63,168,.5);">
+            <div style="border-radius:16px;padding:20px;background:linear-gradient(155deg,var(--blue-deep),var(--blue-mid));color:#fff;box-shadow:0 18px 40px -18px rgba(11,63,168,.5);">
               <div style="font-weight:600;font-size:14px;opacity:.85;margin-bottom:14px;">Así pagas lo justo</div>
               <div id="justBubble" style="min-height:2.7em;"></div>
               <div class="pop-in" id="justCount" style="margin-top:14px;font-family:var(--font-mono);font-size:26px;font-weight:600;">1 <span style="font-size:13px;font-weight:500;opacity:.8;">mensaje</span></div>
@@ -567,8 +598,8 @@
 
   @keyframes nudge{0%,100%{transform:translateX(0);}50%{transform:translateX(5px);}}
 
-  .chat-row{display:flex;gap:8px;align-items:flex-end;opacity:0;transform:translateY(8px);transition:opacity .4s ease,transform .4s ease;}
-  .slide.is-active .chat-row{opacity:1;transform:translateY(0);}
+  .chat-row{display:flex;gap:8px;align-items:flex-end;opacity:0;transition:opacity .35s ease;}
+  .slide.is-active .chat-row{opacity:1;}
   .chat-bubble{max-width:72%;padding:9px 12px;border-radius:12px;font-size:13.5px;line-height:1.4;}
   .chat-row.out{justify-content:flex-end;}
   .chat-row.out .chat-bubble{background:var(--surface-2);border-bottom-right-radius:3px;}
@@ -594,8 +625,10 @@
 
   for (var i = 0; i < total; i++) {
     var d = document.createElement('button');
-    d.setAttribute('aria-label', 'Ir a la diapositiva ' + (i+1));
+    var slideTitle = slides[i].getAttribute('data-title') || ('Diapositiva ' + (i+1));
+    d.setAttribute('aria-label', 'Ir a la diapositiva ' + (i+1) + ': ' + slideTitle);
     if (i === 0) d.classList.add('is-active');
+    d.innerHTML = '<span class="dot-tooltip" role="tooltip">' + slideTitle + '</span>';
     (function(idx){ d.addEventListener('click', function(){ goTo(idx); }); })(i);
     dotsWrap.appendChild(d);
   }
@@ -610,12 +643,19 @@
     counterEl.innerHTML = '<b>' + pad(current+1) + '</b> / ' + pad(total);
     progressFill.style.width = ((current+1) / total * 100) + '%';
     prevBtn.disabled = current === 0;
-    nextBtn.disabled = current === total - 1;
+    nextBtn.disabled = false;
+    nextBtn.setAttribute('aria-label', current === total - 1 ? 'Volver al inicio' : 'Siguiente diapositiva');
     triggerSlideEffects(current);
   }
 
   function goTo(idx){
-    current = Math.max(0, Math.min(total - 1, idx));
+    if (idx >= total) {
+      current = 0;
+    } else if (idx < 0) {
+      current = 0;
+    } else {
+      current = idx;
+    }
     render();
   }
   function next(){ goTo(current + 1); }
@@ -625,6 +665,11 @@
   nextBtn.addEventListener('click', next);
   document.getElementById('zoneLeft').addEventListener('click', prev);
   document.getElementById('zoneRight').addEventListener('click', next);
+  var logoTop = document.getElementById('logoTop');
+  if (logoTop) {
+    logoTop.addEventListener('click', function(){ goTo(0); });
+    logoTop.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goTo(0); } });
+  }
 
   window.addEventListener('keydown', function(e){
     if (e.key === 'ArrowRight') next();
@@ -718,8 +763,7 @@
       var row = document.createElement('div');
       row.className = 'chat-row ' + m.dir;
       row.style.opacity = '0';
-      row.style.transform = 'translateY(8px)';
-      row.style.transition = 'opacity .35s ease, transform .35s ease';
+      row.style.transition = 'opacity .35s ease';
       if (m.dir === 'out' && !reduced) {
         row.innerHTML = '<div class="chat-bubble typing"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>';
       } else if (m.dir === 'out') {
@@ -733,7 +777,6 @@
       chatTimers.push(setTimeout(function(){
         if (chatSeq !== mySeq) return;
         row.style.opacity = '1';
-        row.style.transform = 'translateY(0)';
       }, showAt));
 
       if (m.dir === 'out' && !reduced) {
@@ -765,8 +808,7 @@
       var row = document.createElement('div');
       row.className = 'chat-row out';
       row.style.opacity = '0';
-      row.style.transform = 'translateY(8px)';
-      row.style.transition = 'opacity .35s ease, transform .35s ease';
+      row.style.transition = 'opacity .35s ease';
       if (!reduced) {
         row.innerHTML = '<div class="chat-bubble typing" style="background:var(--surface-2);"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>';
       } else {
@@ -778,7 +820,6 @@
       wasteTimers.push(setTimeout(function(){
         if (wasteSeq !== mySeq) return;
         row.style.opacity = '1';
-        row.style.transform = 'translateY(0)';
       }, showAt));
 
       if (!reduced) {
